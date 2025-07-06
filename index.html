@@ -1,84 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Top People Countdown Timer</title>
-<style>
-  body {
-    background: #121212;
-    color: #0f0;
-    font-family: monospace;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    font-size: 2rem;
-    text-align: center;
-  }
-  #elapsed, #remaining, #nowShowing {
-    margin: 10px 0;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>Top People Countdown</title>
+  <style>
+    body {
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-size: 2rem;
+      text-align: center;
+    }
+    #elapsed, #remaining, #nowShowing {
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
+  <div><strong>Top 1,252,802 People Countdown</strong></div>
+  <div id="elapsed">Elapsed: Loading...</div>
+  <div id="remaining">Remaining: Loading...</div>
+  <div id="nowShowing">Now showing top person #Loading...</div>
 
-<div>👥 <strong>Top 1,252,802 People</strong></div>
-<div id="elapsed">Elapsed: --</div>
-<div id="remaining">Remaining: --</div>
-<div id="nowShowing">Now showing top person #--</div>
+  <script>
+    const totalPeople = 1252802;
+    const secondsPerPerson = 4;
 
-<script>
-  const totalPeople = 1252802;
-  const secondsPerPerson = 4;
-  
-  // Start time in EDT is UTC-4, so convert to UTC
-  // July 1, 2025, 6:15 PM EDT = July 1, 2025, 22:15 UTC
-  const startTimeUTC = new Date(Date.UTC(2025, 6, 1, 22, 15, 0)); // Months 0-based, so July=6
+    // July 1, 2025 at 6:15 PM EDT = 2025-07-01T22:15:00Z (UTC)
+    const startTime = new Date(Date.UTC(2025, 6, 1, 22, 15, 0));
+    const totalDuration = totalPeople * secondsPerPerson;
 
-  const totalDurationSeconds = totalPeople * secondsPerPerson;
-
-  function pad(num) {
-    return num.toString().padStart(2, '0');
-  }
-
-  function formatTime(seconds) {
-    const days = Math.floor(seconds / 86400);
-    seconds %= 86400;
-    const hours = Math.floor(seconds / 3600);
-    seconds %= 3600;
-    const minutes = Math.floor(seconds / 60);
-    seconds %= 60;
-    return `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
-  }
-
-  function updateTimer() {
-    const now = new Date();
-
-    let elapsedSec = Math.floor((now - startTimeUTC) / 1000);
-    if (elapsedSec < 0) elapsedSec = 0;
-
-    let remainingSec = totalDurationSeconds - elapsedSec;
-    if (remainingSec < 0) remainingSec = 0;
-
-    const personIndex = Math.floor(elapsedSec / secondsPerPerson);
-    let currentPerson = totalPeople - personIndex;
-    if (currentPerson < 1) currentPerson = 1;
-
-    document.getElementById('elapsed').textContent = 'Elapsed: ' + formatTime(elapsedSec);
-    document.getElementById('remaining').textContent = 'Remaining: ' + formatTime(remainingSec);
-
-    if (elapsedSec >= totalDurationSeconds) {
-      document.getElementById('nowShowing').textContent = '🎉 Finished showing all people!';
-    } else {
-      document.getElementById('nowShowing').textContent = 'Now showing top person #' + currentPerson;
+    function formatTime(seconds) {
+      const d = Math.floor(seconds / 86400);
+      seconds %= 86400;
+      const h = Math.floor(seconds / 3600);
+      seconds %= 3600;
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${d}d ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
     }
-  }
 
-  updateTimer();
-  setInterval(updateTimer, 1000);
-</script>
+    function update() {
+      const now = new Date();
+      let elapsed = Math.floor((now - startTime) / 1000);
+      if (elapsed < 0) elapsed = 0;
+      if (elapsed > totalDuration) elapsed = totalDuration;
 
-</body>
-</html>
+      const remaining = totalDuration - elapsed;
+      const peoplePassed =
